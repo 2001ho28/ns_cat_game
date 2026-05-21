@@ -20,8 +20,8 @@ window.addEventListener('resize', resizeCanvas);
 const GRAVITY          = 0.38;
 const JUMP_FORCE       = -7.2;
 const PIPE_WIDTH       = 74;
-const PIPE_GAP         = 205;  // 고정 넓은 갭
-const BASE_PIPE_SPEED  = 2.9;
+const PIPE_GAP         = 198;  // 고정 갭
+const BASE_PIPE_SPEED  = 3.0;
 const PIPE_INTERVAL    = 2000; // ms
 const GROUND_H         = 80;
 const PLAYER_X         = 110;
@@ -258,7 +258,7 @@ const BOSS_PIPE_SPACING = 90;  // 돌진용 파이프 간격
 // ── 업데이트 ──────────────────────────────────────────
 function update(now, dt) {
     animTick++;
-    pipeSpeed = BASE_PIPE_SPEED + score * 0.03;
+    pipeSpeed = BASE_PIPE_SPEED + score * 0.055;
     const spd = pipeSpeed;
 
     const invincible = shieldActive || bossRush || bossReturn;
@@ -1021,10 +1021,10 @@ function drawMenu() {
     ctx.restore();
 
     // ── 시작 버튼 (슈리 위로 올라오지 않도록 배치) ──
-    // 슈리 상단 y≈294, 버튼 하단 y≈268 → 26px 여백 확보
+    // 슈리 상단 y≈294, 버튼 하단 y≈286 → 8px 여백 확보
     const pulse = 1 + Math.sin(animTick * 0.065) * 0.035;
     ctx.save();
-    ctx.translate(W / 2, 242);
+    ctx.translate(W / 2, 260);
     ctx.scale(pulse, pulse);
     ctx.shadowBlur = 28; ctx.shadowColor = 'rgba(255,80,80,0.65)';
     const btnG = ctx.createLinearGradient(0, -26, 0, 26);
@@ -1050,7 +1050,7 @@ function drawMenu() {
     ctx.font         = '13px Segoe UI';
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, 282);
+    ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, 292);
     ctx.restore();
 }
 
