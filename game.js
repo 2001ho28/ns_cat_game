@@ -1020,15 +1020,6 @@ function drawMenu() {
     }
     ctx.restore();
 
-    // 조작 안내 (버튼 위)
-    ctx.save();
-    ctx.fillStyle    = 'rgba(255,255,255,0.75)';
-    ctx.font         = '13px Segoe UI';
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, 244);
-    ctx.restore();
-
     // ── 시작 버튼 (슈리 바로 위에 딱 붙여 배치) ──
     // 슈리 상단 y≈294, 버튼 하단 y≈294 → 딱 맞춤
     const pulse = 1 + Math.sin(animTick * 0.065) * 0.035;
@@ -1051,6 +1042,15 @@ function drawMenu() {
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('▶  게임 시작', 0, 0);
+    ctx.restore();
+
+    // 조작 안내 (버튼 아래)
+    ctx.save();
+    ctx.fillStyle    = 'rgba(255,255,255,0.75)';
+    ctx.font         = '13px Segoe UI';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, 310);
     ctx.restore();
 }
 
