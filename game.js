@@ -92,8 +92,27 @@ function bgmStep() {
 function startBGM() { if (bgmPlaying) return; bgmPlaying=true; bgmBeat=0; bgmStep(); }
 function stopBGM()  { bgmPlaying=false; if(bgmTimer) clearTimeout(bgmTimer); }
 
-// ── 슈리 이미지 ───────────────────────────────────────
-const SHURI_IMG = new Image();
+// ── 슈리 이미지 (흰 배경 제거 처리) ─────────────────
+const SHURI_IMG  = new Image();
+let   SHURI_PROC = null;   // 흰 배경 제거된 offscreen 캔버스
+
+SHURI_IMG.onload = function () {
+    try {
+        const oc  = document.createElement('canvas');
+        oc.width  = SHURI_IMG.naturalWidth;
+        oc.height = SHURI_IMG.naturalHeight;
+        const oc2 = oc.getContext('2d');
+        oc2.drawImage(SHURI_IMG, 0, 0);
+        const d = oc2.getImageData(0, 0, oc.width, oc.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+            const r = d.data[i], g = d.data[i + 1], b = d.data[i + 2];
+            // 순수 흰색에 가까운 배경 픽셀만 투명화 (독수리 흰 깃털은 완전 흰색이 아님)
+            if (r > 245 && g > 245 && b > 245) d.data[i + 3] = 0;
+        }
+        oc2.putImageData(d, 0, 0);
+        SHURI_PROC = oc;
+    } catch (e) { /* 크로스오리진 등 예외 시 원본 사용 */ }
+};
 SHURI_IMG.src = 'shuri.png';
 
 // ── 게임 상태 ─────────────────────────────────────────
@@ -927,94 +946,95 @@ function drawMenu() {
 
     drawClouds();
 
-    // ── 슈리 이미지 (배경) ──
-    if (SHURI_IMG.complete && SHURI_IMG.naturalWidth > 0) {
-        const iw = W;
-        const ih = W * (806 / 1210);
-        const ix = 0;
-        const iy = H - ih - GROUND_H + 10;
+    // ── 슈리 이미지 (원본 밝기, 흰 배경 제거, 하단에 크게) ──
+    const shuriSrc = SHURI_PROC || (SHURI_IMG.complete && SHURI_IMG.naturalWidth > 0 ? SHURI_IMG : null);
+    if (shuriSrc) {
+        const iw = 400;
+        const ih = iw * (806 / 1210);   // ≈ 266px
+        const ix = (W - iw) / 2;
+        const iy = H - GROUND_H - ih;   // ≈ 294
+
+        // 슈리 뒤 은은한 햇살 글로우 (존재감 강화)
         ctx.save();
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.globalAlpha = 0.92;
-        ctx.drawImage(SHURI_IMG, ix, iy, iw, ih);
+        const glow = ctx.createRadialGradient(W / 2, iy + ih * 0.42, 10, W / 2, iy + ih * 0.42, iw * 0.62);
+        glow.addColorStop(0, 'rgba(255,235,155,0.40)');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, W, H);
         ctx.restore();
+
+        // 원본 밝기 그대로 렌더 (multiply 없음)
+        ctx.drawImage(shuriSrc, ix, iy, iw, ih);
     }
 
     drawGround();
 
-    // ── 타이틀 패널 (반투명 카드) ──
+    // ── 타이틀 패널 (반투명 카드, 상단) ──
     ctx.save();
-    ctx.shadowBlur = 30; ctx.shadowColor = 'rgba(0,0,0,0.25)';
+    ctx.shadowBlur = 22; ctx.shadowColor = 'rgba(0,0,0,0.20)';
     ctx.fillStyle  = 'rgba(255,255,255,0.28)';
-    rrect(W / 2 - 178, 62, 356, 188, 28);
+    rrect(W / 2 - 172, 14, 344, 204, 26);
     ctx.fill();
     ctx.shadowBlur = 0;
-
-    // 카드 테두리
-    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.78)';
     ctx.lineWidth   = 1.5;
-    rrect(W / 2 - 178, 62, 356, 188, 28);
+    rrect(W / 2 - 172, 14, 344, 204, 26);
     ctx.stroke();
 
-    // 부제 (위)
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.font      = '15px Segoe UI';
+    // 부제
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.font      = '14px Segoe UI';
     ctx.textAlign = 'center';
-    ctx.fillText('✦  독수리 슈리의 대모험  ✦', W / 2, 93);
+    ctx.fillText('✦  독수리 슈리의 대모험  ✦', W / 2, 44);
 
     // 구분선
     ctx.strokeStyle = 'rgba(255,255,255,0.35)';
     ctx.lineWidth   = 1;
-    ctx.beginPath(); ctx.moveTo(W/2 - 130, 102); ctx.lineTo(W/2 + 130, 102); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W / 2 - 118, 52); ctx.lineTo(W / 2 + 118, 52); ctx.stroke();
 
     // 메인 타이틀
-    ctx.shadowBlur = 22; ctx.shadowColor = 'rgba(255,200,50,0.7)';
+    ctx.shadowBlur = 20; ctx.shadowColor = 'rgba(255,200,50,0.75)';
     ctx.fillStyle  = '#FFFFFF';
     ctx.font       = 'bold 44px Segoe UI';
-    ctx.fillText('NS 슈리의', W / 2, 152);
-    ctx.font       = 'bold 48px Segoe UI';
+    ctx.fillText('NS 슈리의', W / 2, 107);
+    ctx.font       = 'bold 50px Segoe UI';
     ctx.fillStyle  = '#FFE066';
-    ctx.fillText('모험', W / 2, 205);
+    ctx.fillText('모험', W / 2, 161);
     ctx.shadowBlur = 0;
-    ctx.restore();
 
-    // ── 최고 점수 배지 ──
+    // 최고 점수 배지 (패널 하단 안쪽)
     if (highScore > 0) {
-        ctx.save();
-        ctx.shadowBlur = 12; ctx.shadowColor = 'rgba(255,200,0,0.4)';
-        ctx.fillStyle  = 'rgba(30,20,0,0.45)';
-        rrect(W / 2 - 92, 270, 184, 38, 19);
+        ctx.fillStyle  = 'rgba(20,10,0,0.45)';
+        rrect(W / 2 - 88, 176, 176, 30, 15);
         ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+        ctx.strokeStyle = 'rgba(255,215,0,0.55)';
         ctx.lineWidth   = 1.2;
-        rrect(W / 2 - 92, 270, 184, 38, 19);
+        rrect(W / 2 - 88, 176, 176, 30, 15);
         ctx.stroke();
         ctx.fillStyle    = '#FFD700';
-        ctx.font         = 'bold 18px Segoe UI';
+        ctx.font         = 'bold 15px Segoe UI';
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(`🏆  최고 점수: ${highScore}`, W / 2, 289);
+        ctx.fillText(`🏆  최고 점수: ${highScore}`, W / 2, 191);
         ctx.textBaseline = 'alphabetic';
-        ctx.restore();
     }
+    ctx.restore();
 
-    // ── 시작 버튼 ──
+    // ── 시작 버튼 (슈리 위로 올라오지 않도록 배치) ──
+    // 슈리 상단 y≈294, 버튼 하단 y≈268 → 26px 여백 확보
     const pulse = 1 + Math.sin(animTick * 0.065) * 0.035;
     ctx.save();
-    ctx.translate(W / 2, highScore > 0 ? 370 : 352);
+    ctx.translate(W / 2, 242);
     ctx.scale(pulse, pulse);
-    ctx.shadowBlur = 26; ctx.shadowColor = 'rgba(255,80,80,0.6)';
-    // 버튼 본체
-    const btnG = ctx.createLinearGradient(0, -28, 0, 28);
+    ctx.shadowBlur = 28; ctx.shadowColor = 'rgba(255,80,80,0.65)';
+    const btnG = ctx.createLinearGradient(0, -26, 0, 26);
     btnG.addColorStop(0, '#FF7676');
     btnG.addColorStop(1, '#E83030');
     ctx.fillStyle = btnG;
-    rrect(-118, -28, 236, 56, 28);
+    rrect(-128, -26, 256, 52, 26);
     ctx.fill();
-    // 버튼 상단 하이라이트
-    ctx.fillStyle = 'rgba(255,255,255,0.2)';
-    rrect(-118, -28, 236, 28, 28);
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    rrect(-128, -26, 256, 26, 26);
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.fillStyle    = 'white';
@@ -1026,65 +1046,12 @@ function drawMenu() {
 
     // 조작 안내
     ctx.save();
-    ctx.fillStyle    = 'rgba(255,255,255,0.75)';
-    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle    = 'rgba(255,255,255,0.80)';
     ctx.font         = '13px Segoe UI';
     ctx.textAlign    = 'center';
-    ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, highScore > 0 ? 414 : 396);
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, 282);
     ctx.restore();
-
-    drawItemGuide();
-}
-
-function drawItemGuide() {
-    ctx.save();
-    ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(0,0,0,0.2)';
-    ctx.fillStyle  = 'rgba(0,30,80,0.45)';
-    rrect(18, 478, W - 36, 136, 14);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-    ctx.lineWidth   = 1;
-    rrect(18, 478, W - 36, 136, 14);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.font      = 'bold 13px Segoe UI';
-    ctx.textAlign = 'center';
-    ctx.fillText('— 아이템 안내 —', W / 2, 500);
-
-    const entries = [
-        { color: '#4FC3F7', icon: '★',  label: '무적',         desc: '4초간 파이프 통과'  },
-        { color: '#FFD700', icon: '×2', label: '×2 점수',       desc: '6초간 점수 2배'    },
-        { color: '#CC44FF', icon: '👑', label: '사장님의 은총', desc: '+5점 & 파이프 소멸' },
-    ];
-
-    const sp = (W - 36) / 3;
-    entries.forEach((e, i) => {
-        const x = 18 + sp * i + sp / 2;
-
-        ctx.shadowBlur = 10; ctx.shadowColor = e.color;
-        ctx.fillStyle  = e.color;
-        rrect(x - 18, 512, 36, 36, 7);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle    = 'white';
-        ctx.font         = 'bold 15px Segoe UI';
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(e.icon, x, 530);
-        ctx.textBaseline = 'alphabetic';
-
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
-        ctx.font      = 'bold 12px Segoe UI';
-        ctx.fillText(e.label, x, 565);
-
-        ctx.fillStyle = 'rgba(255,255,255,0.65)';
-        ctx.font      = '11px Segoe UI';
-        ctx.fillText(e.desc, x, 582);
-    });
 }
 
 // ── 게임 오버 화면 ────────────────────────────────────
