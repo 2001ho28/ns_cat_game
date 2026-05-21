@@ -18,7 +18,7 @@ window.addEventListener('resize', resizeCanvas);
 
 // ── 상수 ──────────────────────────────────────────────
 const GRAVITY          = 0.38;
-const JUMP_FORCE       = -7.2;
+const JUMP_FORCE       = -7.8;
 const PIPE_WIDTH       = 74;
 const PIPE_GAP         = 198;  // 고정 갭
 const BASE_PIPE_SPEED  = 3.0;
