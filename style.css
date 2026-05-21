@@ -1,0 +1,110 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+}
+
+canvas {
+    display: block;
+}
+
+/* ── 이름 입력 오버레이 ── */
+#name-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.62);
+    z-index: 20;
+    border-radius: 4px;
+}
+#name-overlay.visible {
+    display: flex;
+}
+
+#name-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 28px 28px 22px;
+    width: 260px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+#name-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+#name-score-line {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 18px;
+}
+
+#name-score-val {
+    font-weight: bold;
+    color: #FF5252;
+    font-size: 18px;
+}
+
+#name-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+#name-input:focus {
+    border-color: #7986CB;
+}
+
+#name-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+#name-buttons button {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+#name-buttons button:hover { opacity: 0.85; }
+
+#name-submit {
+    background: linear-gradient(135deg, #66BB6A, #388E3C);
+    color: white;
+}
+
+#name-skip {
+    background: #eee;
+    color: #888;
+}

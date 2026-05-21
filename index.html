@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>CAT Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- 이름 입력 오버레이 -->
+        <div id="name-overlay">
+            <div id="name-box">
+                <div id="name-title">기록 저장</div>
+                <div id="name-score-line">이번 점수: <span id="name-score-val">0</span>점</div>
+                <input id="name-input" type="text" maxlength="10" placeholder="이름을 입력하세요 (최대 10자)">
+                <div id="name-buttons">
+                    <button id="name-submit">💾 저장</button>
+                    <button id="name-skip">건너뛰기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
