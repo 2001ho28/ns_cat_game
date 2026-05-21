@@ -258,7 +258,7 @@ const BOSS_PIPE_SPACING = 90;  // 돌진용 파이프 간격
 // ── 업데이트 ──────────────────────────────────────────
 function update(now, dt) {
     animTick++;
-    pipeSpeed = BASE_PIPE_SPEED + score * 0.055;
+    pipeSpeed = BASE_PIPE_SPEED + score * 0.072;
     const spd = pipeSpeed;
 
     const invincible = shieldActive || bossRush || bossReturn;
