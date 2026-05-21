@@ -92,6 +92,10 @@ function bgmStep() {
 function startBGM() { if (bgmPlaying) return; bgmPlaying=true; bgmBeat=0; bgmStep(); }
 function stopBGM()  { bgmPlaying=false; if(bgmTimer) clearTimeout(bgmTimer); }
 
+// ── 슈리 이미지 ───────────────────────────────────────
+const SHURI_IMG = new Image();
+SHURI_IMG.src = 'shuri.png';
+
 // ── 게임 상태 ─────────────────────────────────────────
 let state;       // 'menu' | 'playing' | 'gameover'
 let score, highScore;
@@ -922,6 +926,20 @@ function drawMenu() {
     ctx.fillRect(0, 0, W, H);
 
     drawClouds();
+
+    // ── 슈리 이미지 (배경) ──
+    if (SHURI_IMG.complete && SHURI_IMG.naturalWidth > 0) {
+        const iw = W;
+        const ih = W * (806 / 1210);
+        const ix = 0;
+        const iy = H - ih - GROUND_H + 10;
+        ctx.save();
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.globalAlpha = 0.92;
+        ctx.drawImage(SHURI_IMG, ix, iy, iw, ih);
+        ctx.restore();
+    }
+
     drawGround();
 
     // ── 타이틀 패널 (반투명 카드) ──
