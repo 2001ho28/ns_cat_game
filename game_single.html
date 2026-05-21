@@ -157,8 +157,8 @@ window.addEventListener('resize', resizeCanvas);
 const GRAVITY          = 0.38;
 const JUMP_FORCE       = -7.2;
 const PIPE_WIDTH       = 74;
-const PIPE_GAP         = 215;  // 고정 넓은 갭
-const BASE_PIPE_SPEED  = 2.6;
+const PIPE_GAP         = 205;  // 고정 넓은 갭
+const BASE_PIPE_SPEED  = 2.9;
 const PIPE_INTERVAL    = 2000; // ms
 const GROUND_H         = 80;
 const PLAYER_X         = 110;
@@ -356,11 +356,11 @@ function spawnPipe(now) {
         });
     }
 
-    // 아이템 (55% 확률, BOSS 가중치 높음)
-    if (Math.random() < 0.55) {
-        // SHIELD 25%, DOUBLE 25%, BOSS 50%
+    // 아이템 (35% 확률, 균등 분배)
+    if (Math.random() < 0.35) {
+        // SHIELD 33%, DOUBLE 33%, BOSS 33%
         const r    = Math.random();
-        const type = r < 0.25 ? 'SHIELD' : r < 0.5 ? 'DOUBLE' : 'BOSS';
+        const type = r < 0.333 ? 'SHIELD' : r < 0.666 ? 'DOUBLE' : 'BOSS';
         items.push({ x: W + PIPE_WIDTH + 37, y: gapCY - gap * 0.1, type, phase: 0, done: false });
     }
 }
@@ -690,9 +690,9 @@ function rrect(x, y, w, h, r) {
 // ── 배경 / 구름 ───────────────────────────────────────
 function drawBg() {
     const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0,   '#74C0E8');
-    g.addColorStop(0.7, '#AED9F0');
-    g.addColorStop(1,   '#D8EFF8');
+    g.addColorStop(0,   '#2A7FC0');
+    g.addColorStop(0.6, '#5BAEE0');
+    g.addColorStop(1,   '#9DCFF0');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
 }
@@ -700,7 +700,7 @@ function drawBg() {
 function drawClouds() {
     ctx.save();
     for (const cl of clouds) {
-        ctx.globalAlpha = 0.72;
+        ctx.globalAlpha = 0.88;
         ctx.fillStyle = 'white';
         const s = cl.scale;
         ctx.beginPath();
@@ -732,21 +732,28 @@ function drawPipe(p) {
     const botH = H - GROUND_H - botY;
 
     // 윗 파이프 몸통
-    ctx.fillStyle = '#5CB85C';
+    ctx.fillStyle = '#3DAA3D';
     ctx.fillRect(p.x, 0, PIPE_WIDTH, p.topH);
     // 윗 파이프 캡
-    ctx.fillStyle = '#3E9142';
+    ctx.fillStyle = '#237823';
     ctx.fillRect(p.x - 6, p.topH - 30, PIPE_WIDTH + 12, 30);
     // 아랫 파이프 몸통
-    ctx.fillStyle = '#5CB85C';
+    ctx.fillStyle = '#3DAA3D';
     ctx.fillRect(p.x, botY, PIPE_WIDTH, botH);
     // 아랫 파이프 캡
-    ctx.fillStyle = '#3E9142';
+    ctx.fillStyle = '#237823';
     ctx.fillRect(p.x - 6, botY, PIPE_WIDTH + 12, 30);
     // 광택
-    ctx.fillStyle = 'rgba(255,255,255,0.13)';
+    ctx.fillStyle = 'rgba(255,255,255,0.22)';
     ctx.fillRect(p.x + 9, 0, 13, p.topH);
     ctx.fillRect(p.x + 9, botY, 13, botH);
+    // 테두리 (윤곽 선명하게)
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(p.x, 0, PIPE_WIDTH, p.topH);
+    ctx.strokeRect(p.x - 6, p.topH - 30, PIPE_WIDTH + 12, 30);
+    ctx.strokeRect(p.x, botY, PIPE_WIDTH, botH);
+    ctx.strokeRect(p.x - 6, botY, PIPE_WIDTH + 12, 30);
 }
 
 // ── 코인 ──────────────────────────────────────────────
@@ -1043,11 +1050,11 @@ function drawTimerBar(label, color, ratio, y) {
 
 // ── 메뉴 화면 ─────────────────────────────────────────
 function drawMenu() {
-    // 배경 그라데이션 (더 깊은 하늘)
+    // 배경 그라데이션 (선명한 하늘)
     const bgG = ctx.createLinearGradient(0, 0, 0, H);
-    bgG.addColorStop(0,   '#3A7BD5');
-    bgG.addColorStop(0.5, '#74C0E8');
-    bgG.addColorStop(1,   '#C8E8F8');
+    bgG.addColorStop(0,   '#1A5FB0');
+    bgG.addColorStop(0.5, '#2A7FC0');
+    bgG.addColorStop(1,   '#7ABCE0');
     ctx.fillStyle = bgG;
     ctx.fillRect(0, 0, W, H);
 
@@ -1057,13 +1064,13 @@ function drawMenu() {
     // ── 타이틀 패널 (반투명 카드) ──
     ctx.save();
     ctx.shadowBlur = 30; ctx.shadowColor = 'rgba(0,0,0,0.25)';
-    ctx.fillStyle  = 'rgba(255,255,255,0.18)';
+    ctx.fillStyle  = 'rgba(255,255,255,0.28)';
     rrect(W / 2 - 178, 62, 356, 188, 28);
     ctx.fill();
     ctx.shadowBlur = 0;
 
     // 카드 테두리
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
     ctx.lineWidth   = 1.5;
     rrect(W / 2 - 178, 62, 356, 188, 28);
     ctx.stroke();
@@ -1151,11 +1158,11 @@ function drawMenu() {
 function drawItemGuide() {
     ctx.save();
     ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(0,0,0,0.2)';
-    ctx.fillStyle  = 'rgba(255,255,255,0.15)';
+    ctx.fillStyle  = 'rgba(0,30,80,0.45)';
     rrect(18, 478, W - 36, 136, 14);
     ctx.fill();
     ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
     ctx.lineWidth   = 1;
     rrect(18, 478, W - 36, 136, 14);
     ctx.stroke();
