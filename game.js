@@ -339,8 +339,9 @@ function update(now, dt) {
         if (player.y - PLAYER_R < 0) { player.y = PLAYER_R; player.vy = 0; }
     }
 
-    // 파이프 스폰
-    if (now - lastPipeTs >= PIPE_INTERVAL) spawnPipe(now);
+    // 파이프 스폰 (속도에 반비례해서 간격 축소 → 파이프 간 거리 일정 유지)
+    const dynInterval = (BASE_PIPE_SPEED * PIPE_INTERVAL) / pipeSpeed;
+    if (now - lastPipeTs >= dynInterval) spawnPipe(now);
 
     // 파이프 이동 & 충돌 & 점수
     for (let i = pipes.length - 1; i >= 0; i--) {
