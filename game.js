@@ -134,10 +134,10 @@ let deathTransitioned; // 사망 연출: gameover 전환 완료 여부
 
 let player, pipes, coins, items, particles, clouds;
 
-highScore = parseInt(localStorage.getItem('hsCatGame') || '0');
+highScore = parseInt(localStorage.getItem('hsCatGame_v2') || '0');
 
 // ── 기록 시스템 ───────────────────────────────────────
-const RECORDS_KEY = 'recordsCatGame';
+const RECORDS_KEY = 'recordsCatGame_v2';
 const MAX_RECORDS = 10;
 
 function loadRecords() {
@@ -151,7 +151,7 @@ function saveRecord(name, sc) {
     if (list.length > MAX_RECORDS) list.length = MAX_RECORDS;
     localStorage.setItem(RECORDS_KEY, JSON.stringify(list));
     highScore = list[0]?.score || highScore;
-    localStorage.setItem('hsCatGame', highScore);
+    localStorage.setItem('hsCatGame_v2', highScore);
 }
 function getTopRecords(n = 5) { return loadRecords().slice(0, n); }
 
@@ -594,7 +594,7 @@ function killPlayer() {
     stopBGM();
     if (score > highScore) {
         highScore = score;
-        localStorage.setItem('hsCatGame', highScore);
+        localStorage.setItem('hsCatGame_v2', highScore);
     }
 }
 
