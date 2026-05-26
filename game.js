@@ -117,6 +117,7 @@ SHURI_IMG.src = 'shuri.png';
 
 // ── 게임 상태 ─────────────────────────────────────────
 let state;       // 'menu' | 'playing' | 'gameover'
+let showHelp = false;
 let score, highScore;
 let animTick;    // 항상 증가 (애니메이션용)
 let lastPipeTs;  // 마지막 파이프 생성 시각 (ms)
@@ -1092,6 +1093,112 @@ function drawMenu() {
     ctx.textBaseline = 'alphabetic';
     ctx.fillText('클릭 또는 스페이스바로 점프!', W / 2, 310);
     ctx.restore();
+
+    // 도움말 버튼 + 오버레이
+    drawHelpBtn();
+    if (showHelp) drawHelpOverlay();
+}
+
+// ── 도움말 버튼 (?  우상단) ───────────────────────────
+function drawHelpBtn() {
+    ctx.save();
+    ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.fillStyle  = 'rgba(255,255,255,0.22)';
+    ctx.beginPath(); ctx.arc(W - 38, 38, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.lineWidth   = 1.8;
+    ctx.stroke();
+    ctx.shadowBlur  = 0;
+    ctx.fillStyle   = 'white';
+    ctx.font        = 'bold 20px Segoe UI';
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', W - 38, 38);
+    ctx.restore();
+}
+
+// ── 도움말 오버레이 ───────────────────────────────────
+function drawHelpOverlay() {
+    // 어두운 배경
+    ctx.fillStyle = 'rgba(0,0,20,0.82)';
+    ctx.fillRect(0, 0, W, H);
+
+    // 카드
+    ctx.save();
+    ctx.shadowBlur = 28; ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.fillStyle  = '#142240';
+    rrect(26, 52, W - 52, H - 104, 20);
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+    ctx.strokeStyle = 'rgba(100,170,255,0.22)';
+    ctx.lineWidth   = 1.2;
+    rrect(26, 52, W - 52, H - 104, 20);
+    ctx.stroke();
+    ctx.restore();
+
+    // 헤더
+    ctx.fillStyle   = '#FFE066';
+    ctx.font        = 'bold 20px Segoe UI';
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('📖  게임 방법', W / 2, 92);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(46, 106); ctx.lineTo(W - 46, 106); ctx.stroke();
+
+    // 내용 헬퍼
+    function sec(label, y) {
+        ctx.fillStyle = '#7EC8FF';
+        ctx.font      = 'bold 14px Segoe UI';
+        ctx.textAlign = 'left';
+        ctx.fillText(label, 46, y);
+    }
+    function body(text, y) {
+        ctx.fillStyle = 'rgba(255,255,255,0.88)';
+        ctx.font      = '13px Segoe UI';
+        ctx.textAlign = 'left';
+        ctx.fillText(text, 56, y);
+    }
+
+    sec('🕹  조작', 136);
+    body('화면 터치 또는 스페이스바 → 점프', 158);
+
+    sec('🎯  목표', 194);
+    body('파이프 사이를 통과할수록 점수 획득', 216);
+    body('갈수록 속도가 빨라지니 조심하세요!', 237);
+
+    sec('🎁  아이템', 273);
+    body('⭐  무적 — 4초간 파이프 통과 가능', 295);
+    body('×2  더블 — 6초간 점수 2배', 318);
+    body('👑  사장님의 은총 — 앞 파이프를 모두 박살!', 341);
+
+    // 구분선
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath(); ctx.moveTo(46, 360); ctx.lineTo(W - 46, 360); ctx.stroke();
+
+    // 팁
+    ctx.fillStyle   = 'rgba(255,220,100,0.65)';
+    ctx.font        = '12px Segoe UI';
+    ctx.textAlign   = 'center';
+    ctx.fillText('💡  아이템은 파이프 사이에 랜덤으로 등장합니다', W / 2, 382);
+
+    // 닫기 버튼
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.14)';
+    rrect(W / 2 - 70, H - 100, 140, 40, 20);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth   = 1.2;
+    rrect(W / 2 - 70, H - 100, 140, 40, 20);
+    ctx.stroke();
+    ctx.fillStyle    = 'rgba(255,255,255,0.85)';
+    ctx.font         = '14px Segoe UI';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✕  닫기', W / 2, H - 80);
+    ctx.restore();
 }
 
 // ── 게임 오버 화면 ────────────────────────────────────
@@ -1285,7 +1392,16 @@ function canvasCoords(e) {
 
 function handleInput(x = -1, y = -1) {
     if (nameInputActive) return;
+
+    // 도움말 오버레이가 열려 있으면 어디든 클릭 시 닫기
+    if (showHelp) { showHelp = false; return; }
+
     if (state === 'menu') {
+        // ? 버튼 클릭 (반지름 22px 허용)
+        if (x >= 0 && Math.hypot(x - (W - 38), y - 38) < 22) {
+            showHelp = true;
+            return;
+        }
         state = 'playing';
         resetGame();
         startBGM();
