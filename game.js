@@ -128,6 +128,9 @@ let bossRush;      // 돌진 중
 let bossRushLeft;  // 남은 파이프 수
 let bossReturn;    // 귀환 중
 let bossFlash;     // 화면 플래시 (0~1)
+let deathFreeze;       // 사망 연출: 공중 정지 카운트 (frames)
+let deathFalling;      // 사망 연출: 낙하 중 여부
+let deathTransitioned; // 사망 연출: gameover 전환 완료 여부
 
 let player, pipes, coins, items, particles, clouds;
 
@@ -197,6 +200,9 @@ function resetGame() {
     bossRushLeft  = 0;
     bossReturn    = false;
     bossFlash     = 0;
+    deathFreeze      = 0;
+    deathFalling     = false;
+    deathTransitioned = false;
 
     player = {
         x: PLAYER_X, y: H / 2 - 40,
@@ -337,6 +343,53 @@ function update(now, dt) {
             else killPlayer();
         }
         if (player.y - PLAYER_R < 0) { player.y = PLAYER_R; player.vy = 0; }
+    }
+
+    // ── 사망 연출: 동결 → 낙하 ──────────────────────────
+    if (!player.alive) {
+        if (deathFreeze > 0) {
+            // ① 공중 정지 — 파이프·코인·구름 모두 동결, 슈리만 살짝 흔들림
+            player.angle = Math.sin(deathFreeze * 0.45) * 10;
+            deathFreeze--;
+        } else {
+            if (!deathFalling) {
+                // ② 낙하 시작 — 폭발 파티클 + 효과음
+                deathFalling = true;
+                sfxDeath();
+                for (let i = 0; i < 22; i++) {
+                    const a = (Math.PI * 2 / 22) * i;
+                    const s = 2.5 + Math.random() * 3.5;
+                    particles.push({
+                        x: player.x, y: player.y,
+                        vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+                        color: ['#FF6B6B','#FFA07A','#FFD700','#FF4500'][i % 4],
+                        size: 4 + Math.random() * 4,
+                        life: 1, decay: 0.018 + Math.random() * 0.015, text: null,
+                    });
+                }
+            }
+            // 낙하 물리 (중력 1.5배, 아래로 회전)
+            player.vy   += GRAVITY * 1.5;
+            player.y    += player.vy;
+            player.angle = Math.min(90, player.angle + 5);
+
+            // ③ 화면 밖 → gameover 전환
+            if (player.y - PLAYER_R > H && !deathTransitioned) {
+                deathTransitioned = true;
+                setTimeout(() => {
+                    state = 'gameover';
+                    setTimeout(showNameInput, 350);
+                }, 300);
+            }
+        }
+        // 파이프·코인·아이템·구름 동결, 파티클만 계속 진행
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx; p.y += p.vy; p.vy += 0.18;
+            p.life -= p.decay;
+            if (p.life <= 0) particles.splice(i, 1);
+        }
+        return;
     }
 
     // 파이프 스폰 (속도에 반비례해서 간격 축소 → 파이프 간 거리 일정 유지)
@@ -533,30 +586,16 @@ function floatText(text, x, y, color, size = 15) {
 }
 
 function killPlayer() {
-    player.alive = false;
-    // 죽음 폭발
-    for (let i = 0; i < 22; i++) {
-        const a = (Math.PI * 2 / 22) * i;
-        const spd2 = 2.5 + Math.random() * 3.5;
-        particles.push({
-            x: player.x, y: player.y,
-            vx: Math.cos(a) * spd2, vy: Math.sin(a) * spd2,
-            color: ['#FF6B6B','#FFA07A','#FFD700','#FF4500'][i % 4],
-            size: 4 + Math.random() * 4,
-            life: 1, decay: 0.018 + Math.random() * 0.015, text: null,
-        });
-    }
-
-    sfxDeath();
+    player.alive  = false;
+    player.vy     = 0;       // 충돌 순간 속도 초기화 → 공중 정지
+    deathFreeze      = 35;   // ~580ms 정지
+    deathFalling     = false;
+    deathTransitioned = false;
     stopBGM();
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('hsCatGame', highScore);
     }
-    setTimeout(() => {
-        state = 'gameover';
-        setTimeout(showNameInput, 350);
-    }, 900);
 }
 
 // ── 그리기 헬퍼 ───────────────────────────────────────
@@ -1196,7 +1235,7 @@ function render() {
     for (const c of coins)  if (!c.done) drawCoin(c);
     for (const it of items) if (!it.done) drawItem(it);
     drawGround();
-    if (player.alive) drawPlayer();
+    if (player.alive || deathFreeze > 0 || deathFalling) drawPlayer();
     drawParticles();
 
     // 사장님의 은총 플래시 오버레이
