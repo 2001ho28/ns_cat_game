@@ -26,7 +26,7 @@ const PIPE_INTERVAL    = 2000; // ms
 const GROUND_H         = 80;
 const PLAYER_X         = 110;
 const PLAYER_R         = 20;
-const GAME_TITLE       = 'NS 슈리의 모험';
+const GAME_TITLE       = '슈리의 모험';
 
 const ITEM_TYPES = {
     SHIELD: { color: '#4FC3F7', label: '무적',       duration: 4000 },
@@ -996,11 +996,11 @@ function drawMenu() {
     // 메인 타이틀
     ctx.shadowBlur = 20; ctx.shadowColor = 'rgba(255,200,50,0.75)';
     ctx.fillStyle  = '#FFFFFF';
-    ctx.font       = 'bold 44px Segoe UI';
-    ctx.fillText('NS 슈리의', W / 2, 107);
     ctx.font       = 'bold 50px Segoe UI';
+    ctx.fillText('슈리의', W / 2, 110);
+    ctx.font       = 'bold 56px Segoe UI';
     ctx.fillStyle  = '#FFE066';
-    ctx.fillText('모험', W / 2, 161);
+    ctx.fillText('모험', W / 2, 172);
     ctx.shadowBlur = 0;
 
     // 최고 점수 배지 (패널 하단 안쪽)
